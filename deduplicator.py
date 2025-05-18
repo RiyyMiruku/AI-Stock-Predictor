@@ -7,6 +7,6 @@ def deduplicate(news):
     embeddings = model.encode(titles, convert_to_tensor=True)
     keep = []
     for i, emb in enumerate(embeddings):
-        if all(util.cos_sim(emb, embeddings[j]) < 0.9 for j in keep):
+        if all(util.cos_sim(emb, embeddings[j]) < 0.8 for j in keep):
             keep.append(i)
     return [news[i] for i in keep]
