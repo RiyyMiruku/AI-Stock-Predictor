@@ -16,6 +16,7 @@ dependencies = [
     { name = "requests" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
+    { name = "twstock" },
     { name = "yfinance" },
 ]
 
@@ -30,6 +31,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.3" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "sentence-transformers", specifier = ">=4.1.0" },
+    { name = "twstock", specifier = ">=1.4.0" },
     { name = "yfinance", specifier = ">=0.2.61" },
 ]
 
@@ -1079,6 +1081,18 @@ dependencies = [
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7d/74/4bf2702b65e93accaa20397b74da46fb7a0356452c1bb94dbabaf0582930/triton-3.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:47bc87ad66fa4ef17968299acacecaab71ce40a238890acc6ad197c3abe2b8f1", size = 156516468, upload-time = "2025-04-09T20:27:48.196Z" },
     { url = "https://files.pythonhosted.org/packages/0a/93/f28a696fa750b9b608baa236f8225dd3290e5aff27433b06143adc025961/triton-3.3.0-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ce4700fc14032af1e049005ae94ba908e71cd6c2df682239aed08e49bc71b742", size = 156580729, upload-time = "2025-04-09T20:27:55.424Z" },
+]
+
+[[package]]
+name = "twstock"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/89/43/8223bbd6d58c9b5262ba03623265a5261a716dc5f167c4eee83ce9bef404/twstock-1.4.0.tar.gz", hash = "sha256:df90924ab7cf670065e76695b051ad84cf1ff0da492f44d2e27bb2af18d329ca", size = 626414, upload-time = "2024-05-16T03:58:00.978Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/17/32aa8bad388aeb5c058d6bdaeeb204d394910340c30f8d7701a614f49647/twstock-1.4.0-py3-none-any.whl", hash = "sha256:2f4e491e7a4eb66c2c923fc426f0ca5016023776f068e1166405e845940558ee", size = 626108, upload-time = "2024-05-16T03:57:52.723Z" },
 ]
 
 [[package]]

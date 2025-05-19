@@ -2,21 +2,48 @@ from fetcher import fetch_yahoo_finance_news
 from deduplicator import deduplicate
 from analyzer import analyze_with_groq
 from daily_tech_factor import compute_technical_factors
-from train_model import SimpleFactorModel
 import pandas as pd
 import json
 import config
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
+import twstock
 
+def is_trading_day():
+    today = datetime.today().date()
+    return twstock.util.is_trading_day(today)
 
 if __name__ == '__main__':
-    #抓取當日新聞
+     # 抓取當日新聞
     news = fetch_yahoo_finance_news(config.NEWS_COUNT)
 
-    print("[Step 1] 原始新聞：", len(news))
+    # 如果不是交易日，新聞先存到暫存檔，結束
+    if not is_trading_day():
+        # 讀取舊的暫存新聞
+        if os.path.exists(config.PENDING_NEWS_FILE):
+            with open(config.PENDING_NEWS_FILE, "r", encoding="utf-8") as f:
+                pending_news = json.load(f)
+        else:
+            pending_news = []
+        # 合併新新聞
+        pending_news.extend(news)
+        # 去重
+        pending_news = deduplicate(pending_news)
+        # 存回暫存檔
+        with open(config.PENDING_NEWS_FILE, "w", encoding="utf-8") as f:
+            json.dump(pending_news, f, ensure_ascii=False, indent=2)
+        print("非交易日，新聞已暫存，等待下次交易日處理。")
+        exit()
 
-    #去除可能的相同新聞事件
+    # 如果是交易日，讀取暫存新聞+當日新聞
+    if os.path.exists(config.PENDING_NEWS_FILE):
+        with open(config.PENDING_NEWS_FILE, "r", encoding="utf-8") as f:
+            pending_news = json.load(f)
+        news.extend(pending_news)
+        os.remove(config.PENDING_NEWS_FILE)  # 清空暫存
+        print(f"合併處理暫存新聞，共 {len(news)} 則")
+
+    # 去重
     news = deduplicate(news)
     print("[Step 2] 去重後：", len(news))
 
