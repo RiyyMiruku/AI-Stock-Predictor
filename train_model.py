@@ -6,6 +6,7 @@ import os
 import yfinance as yf
 import config
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 class SimpleFactorModel:
     def __init__(self):
@@ -14,12 +15,24 @@ class SimpleFactorModel:
         self.is_trained = False
 
     def train(self, X, y):
+        """
+        訓練模型：
+        - 初次訓練：逐筆 partial_fit，保持每筆資料影響力一致
+        - 後續訓練：正常 partial_fit（單筆或小批資料）
+        """
         if not self.is_trained:
-            # 初次訓練，fit scaler
-            X_scaled = self.scaler.fit_transform(X)
-            self.model.partial_fit(X_scaled, y)
+            # 標準化器 fit（在全部初始資料上）
+            self.scaler.fit(X)
+            X_scaled = self.scaler.transform(X)
+
+            # 一筆一筆地做 partial_fit
+            for i in range(len(X_scaled)):
+                Xi = X_scaled[i].reshape(1, -1)
+                yi = np.array([y[i]])
+                self.model.partial_fit(Xi, yi)
+
             self.is_trained = True
-            print("模型初次已訓練完成。")
+            print("模型初次訓練（逐筆）完成。")
         else:
             # 後續增量訓練
             X_scaled = self.scaler.transform(X)
