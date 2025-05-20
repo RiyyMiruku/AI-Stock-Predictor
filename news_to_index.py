@@ -5,20 +5,28 @@ from daily_tech_factor import compute_technical_factors
 import pandas as pd
 import json
 import config
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
-import twstock
+import requests
+import yfinance as yf
 
-def is_trading_day():
-    today = datetime.today().date()
-    return twstock.util.is_trading_day(today)
+
+def is_today_market_closed(symbol: str) -> bool:
+  
+    today = datetime.now().date()
+    data = yf.download(symbol, start=today, end=today + timedelta(days=1), progress=False)
+
+    if data.empty:
+        return False
+    else:
+        return True
 
 if __name__ == '__main__':
      # 抓取當日新聞
     news = fetch_yahoo_finance_news(config.NEWS_COUNT)
 
     # 如果不是交易日，新聞先存到暫存檔，結束
-    if not is_trading_day():
+    if not is_today_market_closed(config.TICKER):
         # 讀取舊的暫存新聞
         if os.path.exists(config.PENDING_NEWS_FILE):
             with open(config.PENDING_NEWS_FILE, "r", encoding="utf-8") as f:
