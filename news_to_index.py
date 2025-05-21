@@ -61,13 +61,7 @@ if __name__ == '__main__':
         print("\n新聞標題：", item['title'])
         analysis = analyze_with_groq(item, config.TICKER)
         print("分析結果：", analysis)
-        try:
-            row = json.loads(analysis)
-            # row['title'] = item['title']
-            # row['content'] = item['content']
-            rows.append(row)
-        except json.JSONDecodeError:
-            print("⚠️ 無法解析 JSON 格式")
+        rows.append(analysis)
     print("\n[Step 3] LLM 解析完畢：")
 
     #將各個新聞因子透過confidence作為權重合併成一筆"當日因子"
@@ -75,7 +69,7 @@ if __name__ == '__main__':
     df_news_factor = pd.DataFrame(rows)
     print(df_news_factor.head())
 
-    numeric_features = ['sentiment_score', 'volatility_hint', 'confidence_level', 'aggregated_signal_score']
+    numeric_features = ['sentiment_score', 'volatility_hint', 'confidence_level', 'aggregated_signal_score', 'positive_neutral_negative']
     weights = df_news_factor['confidence_level']
     weighted_avg = (df_news_factor[numeric_features].T * weights).T.sum() / weights.sum()
     daily_news_feature = weighted_avg.to_frame().T
@@ -86,10 +80,10 @@ if __name__ == '__main__':
     #抓取前幾日技術指標因子
     daily_tech_feature= compute_technical_factors(config.TICKER)
     print("\n[Step 4] 技術指標：")
-    print(daily_tech_feature.tail(1))
+    print(daily_tech_feature)
 
     #合併新聞因子與技術指標因子
-    tech = daily_tech_feature.tail(1).reset_index(drop=True)
+    tech = daily_tech_feature.reset_index(drop=True)
     tech.columns = [f"tech_{col}" for col in tech.columns]  # 強制單層欄位名
     daily_feature = pd.concat([daily_news_feature, tech], axis=1)
 
