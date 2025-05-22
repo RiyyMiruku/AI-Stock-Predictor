@@ -70,7 +70,6 @@ if __name__ == "__main__":
     # 用合併後的 close 欄位計算 target
     df['target'] = df['close'].shift(-1) / df['close'] - 1
 
-
     # 覆蓋寫回原有 CSV
     df.to_csv(csv_path, index=False)
     print(f"已將隔日漲跌幅對齊並寫回 {csv_path}")
