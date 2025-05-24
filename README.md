@@ -1,4 +1,4 @@
-# AI_Stock_Predictor
+# AI-Stock-Predictor
 
 AI_Stock_Predictor 是一個自動化台股指數預測系統，結合每日新聞情緒分析與技術指標，持續累積資料並訓練機器學習模型，預測隔日台股指數漲跌幅。
 
