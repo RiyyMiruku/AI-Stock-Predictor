@@ -44,7 +44,7 @@ if __name__ == '__main__':
         # 存回暫存檔
         with open(config.PENDING_NEWS_FILE, "w", encoding="utf-8") as f:
             json.dump(pending_news, f, ensure_ascii=False, indent=2)
-        print("非交易日，新聞已暫存，等待下次交易日處理。")
+        print("新聞已暫存，等待下次交易日處理。")
         exit()
 
     # 如果是交易日，讀取暫存新聞+當日新聞
