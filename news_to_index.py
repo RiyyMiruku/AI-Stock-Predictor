@@ -21,7 +21,7 @@ def is_today_market_closed(symbol: str) -> bool:
     #若下載的筆數非空，判斷下載的資料的日期是否為今天
     if not data.index.empty:
         # 若第一筆資料的日期為今天，表示今天是交易日
-        if data.index[0].date() == today:
+        if data.index[0].date() == today + timedelta(days=-1):
             return True
     return False
 
