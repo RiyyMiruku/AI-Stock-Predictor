@@ -23,7 +23,6 @@ def analyze_with_groq( new : dict[str, str] ,ticker)-> str:
   "sentiment_score": 0~100,
   "volatility_hint": 0~100,
   "confidence_level": 0~100,
-  "aggregated_signal_score": 0~100,
   "positive_neutral_negative": "positive" 或 "neutral" 或 "negative"
 }}
 新聞:{new['content']}

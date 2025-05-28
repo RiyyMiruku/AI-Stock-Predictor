@@ -19,13 +19,12 @@ def compute_technical_factors(ticker):
     df["momentum_1d"] = df["Close"].pct_change()
     df["volatility_5d"] = df["Close"].rolling(5).std()
     df["ma_5"] = df["Close"].rolling(5).mean()
-    df["ma_10"] = df["Close"].rolling(10).mean()
     df["bias_5"] = (df["Close"] - df["ma_5"]) / df["ma_5"]
     df["rsi_5"] = calc_rsi(df["Close"], 5)
     # 印出今日收盤價
     print("今日日期：", df.index[-1], "收盤價：", df["Close"].iloc[-1])
 
-    return df[["momentum_1d", "volatility_5d", "ma_5", "ma_10", "bias_5", "rsi_5"]].dropna().tail(1)
+    return df[["momentum_1d", "volatility_5d", "ma_5", "bias_5", "rsi_5"]].dropna().tail(1)
 
 if __name__ == "__main__":
     print(compute_technical_factors("^TWII"))

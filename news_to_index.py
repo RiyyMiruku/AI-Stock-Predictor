@@ -7,7 +7,6 @@ import json
 import config
 from datetime import datetime, timedelta
 import os
-import requests
 import yfinance as yf
 
 
@@ -73,7 +72,7 @@ if __name__ == '__main__':
     df_news_factor = pd.DataFrame(rows)
     print(df_news_factor.head())
 
-    numeric_features = ['sentiment_score', 'volatility_hint', 'confidence_level', 'aggregated_signal_score', 'positive_neutral_negative']
+    numeric_features = ['sentiment_score', 'volatility_hint', 'confidence_level', 'positive_neutral_negative']
     weights = df_news_factor['confidence_level']
     weighted_avg = (df_news_factor[numeric_features].T * weights).T.sum() / weights.sum()
     daily_news_feature = weighted_avg.to_frame().T
