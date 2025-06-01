@@ -38,23 +38,27 @@ class SimpleFactorModel:
                 y_true = y[:i+1]
                 y_pred = self.model.predict(X_scaled[:i+1])
 
-                # Baseline: 預測值為前一天 target 值
                 if i >= 1:
-                    y_baseline = y_true.shift(1).fillna(0).values
+                    y_baseline = np.roll(y_true, 1)
+                    y_baseline[0] = 0
                 else:
                     y_baseline = np.zeros_like(y_true)
 
                 mse = mean_squared_error(y_true, y_pred)
-                r2 = r2_score(y_true, y_pred)
                 base_mse = mean_squared_error(y_true, y_baseline)
-                base_r2 = r2_score(y_true, y_baseline)
+
+                if len(y_true) >= 2:
+                    r2 = r2_score(y_true, y_pred)
+                    base_r2 = r2_score(y_true, y_baseline)
+                else:
+                    r2 = np.nan
+                    base_r2 = np.nan
 
                 mse_list.append(mse)
                 r2_list.append(r2)
                 baseline_mse_list.append(base_mse)
                 baseline_r2_list.append(base_r2)
                 sample_counts.append(i + 1)
-
             self.is_trained = True
             print("模型初次訓練（逐筆）完成。")
 
