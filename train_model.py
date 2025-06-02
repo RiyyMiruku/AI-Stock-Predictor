@@ -9,8 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import config
 
-
-
 # 確保 model 資料夾存在
 os.makedirs("model", exist_ok=True)
 
@@ -18,97 +16,64 @@ class SimpleFactorModel:
     def __init__(self):
         self.model = SGDRegressor()
         self.scaler = StandardScaler()
-        self.is_trained = False
 
     def train(self, X, y):
-        mse_list = []
-        r2_list = []
-        baseline_mse_list = []
-        baseline_r2_list = []
-        sample_counts = []
+        # 重新 fit scaler 並訓練模型
+        self.scaler.fit(X)
+        X_scaled = self.scaler.transform(X)
 
-        if not self.is_trained:
-            self.scaler.fit(X)
-            X_scaled = self.scaler.transform(X)
-            for i in range(len(X_scaled)):
-                Xi = X_scaled[i].reshape(1, -1)
-                yi = np.array([y[i]])
-                self.model.partial_fit(Xi, yi)
+        # 全量 fit
+        self.model = SGDRegressor()
+        self.model.fit(X_scaled, y)
 
-                y_true = y[:i+1]
-                y_pred = self.model.predict(X_scaled[:i+1])
+        # 模型預測
+        y_pred = self.model.predict(X_scaled)
+        y_baseline = y.shift(1).fillna(0).values
 
-                if i >= 1:
-                    y_baseline = np.roll(y_true, 1)
-                    y_baseline[0] = 0
-                else:
-                    y_baseline = np.zeros_like(y_true)
+        # 評估指標
+        mse = mean_squared_error(y, y_pred)
+        r2 = r2_score(y, y_pred)
+        base_mse = mean_squared_error(y, y_baseline)
+        base_r2 = r2_score(y, y_baseline)
 
-                mse = mean_squared_error(y_true, y_pred)
-                base_mse = mean_squared_error(y_true, y_baseline)
+        print("模型已重新訓練（全資料）。")
+        print(f"MSE: {mse:.6f}, R2: {r2:.4f}")
+        print(f"Baseline MSE: {base_mse:.6f}, Baseline R2: {base_r2:.4f}")
 
-                if len(y_true) >= 2:
-                    r2 = r2_score(y_true, y_pred)
-                    base_r2 = r2_score(y_true, y_baseline)
-                else:
-                    r2 = np.nan
-                    base_r2 = np.nan
+        # 繪製 MSE 圖
+        plt.figure()
+        plt.bar(['Model MSE', 'Baseline MSE'], [mse, base_mse], color=['blue', 'gray'])
+        plt.ylabel('MSE')
+        plt.title('Model vs Baseline MSE')
+        plt.tight_layout()
+        plt.savefig('model/mse_comparison.png')
+        plt.close()
 
-                mse_list.append(mse)
-                r2_list.append(r2)
-                baseline_mse_list.append(base_mse)
-                baseline_r2_list.append(base_r2)
-                sample_counts.append(i + 1)
-            self.is_trained = True
-            print("模型初次訓練（逐筆）完成。")
+        # 繪製 R2 圖
+        plt.figure()
+        plt.bar(['Model R2', 'Baseline R2'], [r2, base_r2], color=['green', 'gray'])
+        plt.ylabel('R2 Score')
+        plt.title('Model vs Baseline R2')
+        plt.tight_layout()
+        plt.savefig('model/r2_comparison.png')
+        plt.close()
 
-            if not os.path.exists(config.FIRST_TRAIN_FLAG):
-                df_save = X.copy()
-                df_save['target'] = y.values if isinstance(y, pd.Series) else y
-                df_save.to_csv("model/first_train_data.csv", index=False)
-                with open(config.FIRST_TRAIN_FLAG, "w") as f:
-                    f.write("done")
-                print("已儲存第一次訓練資料為 model/first_train_data.csv")
-        else:
-            X_scaled = self.scaler.transform(X)
-            self.model.partial_fit(X_scaled, y)
-            y_pred = self.model.predict(X_scaled)
-
-            y_baseline = y.shift(1).fillna(0).values
-
-            mse = mean_squared_error(y, y_pred)
-            r2 = r2_score(y, y_pred)
-            base_mse = mean_squared_error(y, y_baseline)
-            base_r2 = r2_score(y, y_baseline)
-
-            mse_list.append(mse)
-            r2_list.append(r2)
-            baseline_mse_list.append(base_mse)
-            baseline_r2_list.append(base_r2)
-            sample_counts.append(len(y))
-            print("完成一次增量訓練。")
-
-        # 繪圖
-        if mse_list and r2_list:
-            plt.figure()
-            plt.plot(sample_counts, mse_list, label='Model MSE')
-            plt.plot(sample_counts, baseline_mse_list, label='Baseline MSE', linestyle='--')
-            plt.plot(sample_counts, r2_list, label='Model R2')
-            plt.plot(sample_counts, baseline_r2_list, label='Baseline R2', linestyle='--')
-            plt.xlabel('Training Samples')
-            plt.ylabel('Score')
-            plt.title('Training MSE and R2 vs Baseline')
-            plt.legend()
-            plt.grid(True)
-            plt.tight_layout()
-            plt.savefig('model/training_metrics.png')
-            plt.close()
-            print("已儲存訓練過程評估圖表 model/training_metrics.png")
+        # 預測 vs 實際
+        plt.figure(figsize=(10, 4))
+        plt.plot(y.values, label='Actual', color='black')
+        plt.plot(y_pred, label='Predicted', color='blue', linestyle='--')
+        plt.title('Predicted vs Actual Returns')
+        plt.xlabel('Sample Index')
+        plt.ylabel('Return')
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig('model/pred_vs_actual.png')
+        plt.close()
 
     def predict(self, X):
         X_scaled = self.scaler.transform(X)
         return self.model.predict(X_scaled)
-
 
 def get_trained_until():
     if os.path.exists(config.TRAINED_UNTIL_PATH):
@@ -143,27 +108,16 @@ if __name__ == "__main__":
         df_train = pd.read_csv(csv_path, parse_dates=['date'])
         df_train = df_train.dropna(subset=['target'])
 
-        trained_until = get_trained_until()
-        if trained_until:
-            df_train = df_train[df_train['date'] > trained_until]
+        X = df_train.drop(['date', 'close', 'target'], axis=1)
+        y = df_train['target']
 
-        if df_train.empty:
-            print("沒有新資料可訓練，跳過。")
-        else:
-            X = df_train.drop(['date', 'close', 'target'], axis=1)
-            y = df_train['target']
+        model = SimpleFactorModel()
+        model.train(X, y)
+        joblib.dump(model, config.MODEL_PATH)
+        joblib.dump(model.scaler, config.SCALER_PATH)
+        update_trained_until(df_train['date'].max())
 
-            if os.path.exists(config.MODEL_PATH):
-                model = joblib.load(config.MODEL_PATH)
-            else:
-                model = SimpleFactorModel()
-
-            model.train(X, y)
-            joblib.dump(model, config.MODEL_PATH)
-            joblib.dump(model.scaler, config.SCALER_PATH)
-            update_trained_until(df_train['date'].max())
-
-            print("模型與標準化器已訓練並保存。")
+        print("模型與標準化器已訓練並保存。")
 
     except Exception as e:
         print(f"訓練過程發生錯誤：{e}")
