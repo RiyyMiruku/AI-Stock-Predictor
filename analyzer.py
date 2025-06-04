@@ -19,7 +19,7 @@ def analyze_with_groq( new : dict[str, str] ,ticker)-> str:
     prompt = f"""
 你是一位專業的台股投資分析師，請根據以下新聞內容，以json格式回傳該新聞對台股「{ticker}」的影響指標，不要其他描述。
 {{
-  "sentiment_score": 0~100(極端負面~極端正面),
+  "sentiment_score": 0~100(對市場的影響力小~對市場的影響力大),
   "volatility_hint": 0~100(暗示市場平穩~暗示市場可能有極大波動),
   "confidence_level": 0~100(你對於這篇新聞分析的把握程度；若此新聞與股市不相關，請將此項訂為0),
   "positive_neutral_negative": "positive" 或 "neutral" 或 "negative"
