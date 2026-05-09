@@ -1,5 +1,25 @@
-# .gitignore
-.venv
+# Python
+__pycache__/
 *.pyc
-__pycache__
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Env / secrets
 .env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Data & model artifacts (uncomment if 你不想把資料/模型納入版控)
+# data/*.csv
+# data/pending_news.json
+# model/*.joblib
+# model/*.save
+# model/*.png
+# model/trained_until.txt
